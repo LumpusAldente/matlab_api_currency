@@ -1,0 +1,73 @@
+strategy(title="trading strat", shorttitle="trading strat", overlay=true, pyramiding=1, initial_capital=1000, currency=currency.EUR)
+
+
+
+//////////////////////////////////////////////////////////////////////
+
+// trend detection nope in use
+//ADXR_VAR_open        = input(20, "ADXR_VAR_open")
+//ADXR_VAR_close       = input(19, "ADXR_VAR_close")
+// rsi
+rsi = rsi(close, 14)
+//stoch
+stochrsi= stoch(rsi,rsi,rsi,14)
+k = sma(stoch(rsi, rsi, rsi,14), 3)
+// rsi/roc new 
+xPrice = close
+nRes = rsi(roc(xPrice,20),20)
+//WaveTrend [LazyBear]
+wt1 = ema((hlc3 - ema(hlc3, 10)) / (0.015 * ema(abs(hlc3 - ema(hlc3, 10)), 10)), 21)
+wt2 = sma(wt1,4)
+// short ma
+maFastLength   = input(defval = 50, title = "Fast MA Period", minval = 1)
+maFast = ema(open, maFastLength)
+// long ma
+maSlowLength   = input(defval = 200, title = "Slow MA Period", minval = 1)
+maSlow = ema(open, maSlowLength)
+//updown   wayup = maFast >= maSlow ? true : false
+//rsibandsLB
+rsibobLevel = input(70, title="rsib Overbought")
+rsibosLevel = input(30, title="rsib Oversold")
+src=close
+rsibauc = ema( max( src - src[1], 0 ), 2 * 14 - 1 )
+rsibadc = ema( max( src[1] - src, 0 ), 2 * 14 - 1 )
+rsibx1 = (14 - 1) * ( rsibadc * rsibobLevel / (100-rsibobLevel) - rsibauc)
+rsibub = iff( rsibx1 >= 0, src + rsibx1, src + rsibx1 * (100-rsibobLevel)/rsibobLevel )
+rsibx2 = (14 - 1) * ( rsibadc * rsibosLevel / (100-rsibosLevel) - rsibauc)
+rsiblb = iff( rsibx2 >= 0, src + rsibx2, src + rsibx2 * (100-rsibosLevel)/rsibosLevel )
+//wtbandsLB
+wtobLevel = rsibobLevel
+wtosLevel = rsibosLevel
+wtsrc=close
+wtauc = wma( max( wtsrc - wtsrc[1], 0 ), 2 * 14 - 1 )
+wtadc = wma( max( wtsrc[1] - wtsrc, 0 ), 2 * 14 - 1 )
+wtx1 = (14 - 1) * ( wtadc * wtobLevel / (100-wtobLevel) - wtauc)
+wtub = iff( wtx1 >= 0, wtsrc + wtx1, wtsrc + wtx1 * (100-wtobLevel)/wtobLevel )
+wtx2 = (14 - 1) * ( wtadc * wtosLevel / (100-wtosLevel) - wtauc)
+wtlb = iff( wtx2 >= 0, wtsrc + wtx2, wtsrc + wtx2 * (100-wtosLevel)/wtosLevel )
+
+// open trade logic
+////////////////
+longCondition   =   wt1 <=-53 and rsi<= 25 and stochrsi <= 24   ? true : false   
+shortCondition  =   wt1 >= 70 and rsi>= 65 and stochrsi >= 90   ? true : false   
+
+
+// Component Code Stop
+//////////////////////////////////////////////////////
+//drawing
+fast = 				plot(maFast, title = "Fast MA", color = green, 	linewidth = 2, 	style = line, 	transp = 50)
+slow = 				plot(maSlow, title = "Slow MA", color = red, 	linewidth = 2, 	style = line, 	transp = 50)
+testResistance  = 	plot(avg(rsibub, wtub), title="testResistance", color=purple, linewidth=2)
+testSupport     = 	plot(avg(rsiblb,wtlb), title="testSupport", color=blue, linewidth=2)
+testmiddle      = 	plot(avg(wtub, wtlb, rsibub, rsiblb), title="testRSI Midline", color=gray, linewidth=1)
+/////////////////////////////////////////////////////
+// === STRATEGY - POSITION EXECUTION ===
+enterLong() => longCondition
+exitLong() =>  shortCondition
+strategy.entry(id = "Long", long = true, when = enterLong()) // use function or simple condition to decide when to get in
+strategy.close(id = "Long", when = exitLong()) // ...and when to get out
+// === STRATEGY - POSITION EXECUTION ===
+enterShort() => shortCondition and false //.. dissabled
+exitShort() => longCondition
+strategy.entry(id = "Short", long = false, when = enterShort())
+strategy.close(id = "Short", when = exitShort())

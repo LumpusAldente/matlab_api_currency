@@ -1,0 +1,40 @@
+Name		Key	Default	Values	Description
+
+Account		a	*	Anything (excluding special characters)	The alias for the API credentials you want to use for this command.
+
+Book		b	all	buy, long; sell, short	The side of the market you would like to play.
+
+Cancel / Close	c	n/a	order, position	Used to cancel open orders or close open positions.
+
+Cancel / Close Maximum Order	cmo	oldest	newest, oldest; lowest, highest; smallest, biggest; random	How the orders are sorted for canceling.
+
+Exchange	e	Chart Symbol	1Broker, BitMEX, Bittrex, Poloniex	The receiving exchange for your command.
+
+Leverage	l	all	>= 0	Leverage allows your available balance to be multiplied but increases risk.
+
+Price		p	0	Static: #, %
+
+Random: 	#-#, %-%	The amount to undercut or overcut the top order in the book.
+
+Quantity	q	100%	Static: #, %
+
+Shared		shared	0	0, 1	1Broker only
+
+Symbol		s	Chart Symbol	BTCUSD3M, LTCUSD, PINKBTC, ...	The receiving exchange's market for your command.
+
+Stop Loss	sl	n/a	Static: #, %
+
+order Type	t	limit	limit, market, close, open, fok, ioc, post	Limit: Order will be placed in the books to await being filled.
+?Market: 	Place order in the book for immediate filling (p is ignored).
+?Close/Open: 	Can be used together with c=order for specific order types.
+?FOK: 		Fill Or Kill orders will either completely fill or be aborted.
+?IOC: 		Immediate Or Cancel orders can be partially or completely filled, but any remaining portion is cancelled.
+?Post: 		If any part of the order would have executed, it will be cancelled instead.
+
+Take Profit	tp	n/a	Static: #, %
+
+Unit		u	contracts	contracts, currency	The quantity (q) unit being provided.
+
+Yield		y	balance	balance, equity	
+Balance: Your available balance excluding open orders/positions.
+Equity: 	Your available balance including profit/loss.
